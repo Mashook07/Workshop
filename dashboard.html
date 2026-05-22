@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard - Firebase App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <nav class="bg-blue-600 text-white px-6 py-4 flex items-center justify-between">
+    <h1 class="text-xl font-bold">Workshop Dashboard</h1>
+    <button id="logout-btn" class="bg-white text-blue-600 px-4 py-1 rounded hover:bg-gray-100 text-sm font-semibold">Logout</button>
+  </nav>
+
+  <div class="max-w-2xl mx-auto mt-10 px-4">
+    <div id="loading" class="text-center text-gray-500">Loading...</div>
+    <div id="content" class="hidden">
+      <div class="bg-white rounded-xl shadow p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-2 text-gray-700">Welcome back!</h2>
+        <p id="dash-email" class="text-gray-600"></p>
+        <p id="dash-username" class="text-gray-600"></p>
+        <p id="dash-phone" class="text-gray-600"></p>
+      </div>
+      <div class="bg-blue-50 border border-blue-200 rounded-xl p-5">
+        <h3 class="font-semibold text-blue-700 mb-1">Account Info</h3>
+        <p class="text-sm text-blue-600">Your account is active and verified.</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnJnHVjuauCIvKJ8IwNombBM6L6bGpLa4",
+      authDomain: "internet-data-selling.firebaseapp.com",
+      projectId: "internet-data-selling",
+      storageBucket: "internet-data-selling.firebasestorage.app",
+      messagingSenderId: "661171379302",
+      appId: "1:661171379302:web:45ee5b81504a15f6b861a7",
+      measurementId: "G-1GF0Y8TYR5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const userRef = ref(database, 'users/' + user.uid);
+        get(userRef).then((snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            document.getElementById("dash-email").innerText = "Email: " + data.email;
+            document.getElementById("dash-username").innerText = "Username: " + data.username;
+            document.getElementById("dash-phone").innerText = "Phone: " + data.phone;
+          }
+          document.getElementById("loading").classList.add("hidden");
+          document.getElementById("content").classList.remove("hidden");
+        });
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      signOut(auth).then(() => {
+        window.location.href = "login.html";
+      });
+    });
+  </script>
+</body>
+</html>
